@@ -1,42 +1,43 @@
 IF EXISTS (select * from dbo.sysobjects where id = object_id(N'[belong]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
 DROP TABLE belong;
-IF EXISTS (select * from dbo.sysobjects where id = object_id(N'[words]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
-DROP TABLE words;
-IF EXISTS (select * from dbo.sysobjects where id = object_id(N'[articles]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
-DROP TABLE articles;
-IF EXISTS (select * from dbo.sysobjects where id = object_id(N'[newspapers]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
-DROP TABLE newspapers;
+IF EXISTS (select * from dbo.sysobjects where id = object_id(N'[word]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
+DROP TABLE word;
+IF EXISTS (select * from dbo.sysobjects where id = object_id(N'[article]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
+DROP TABLE article;
+IF EXISTS (select * from dbo.sysobjects where id = object_id(N'[newspaper]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
+DROP TABLE newspaper;
 
 
-CREATE TABLE NEWSPAPERS
+CREATE TABLE NEWSPAPER
 (
 id_newspaper int identity(1,1) primary key,
 name_newspaper varchar(50)
 );
 
-CREATE TABLE ARTICLES
+CREATE TABLE ARTICLE
 (
 id_article int identity(1,1) primary key ,
 link_article varchar(255),
 publication_date date,
-authors varchar(255),
-id_newspaper int references NEWSPAPERS (id_newspaper)
+author varchar(255),
+id_newspaper int references NEWSPAPER (id_newspaper)
 );
 
-CREATE TABLE WORDS
+CREATE TABLE WORD
 (
 id_word int identity(1,1) primary key ,
-word varchar(100),
+label_word varchar(100),
 pos_tag varchar(30)
 );
 
 CREATE TABLE BELONG
 (
-id_article int references ARTICLES (id_article),
-id_word int references WORDS (id_word),
+id_article int references ARTICLE (id_article),
+id_word int references WORD (id_word),
 tf int,
 is_description tinyint,
-is_title tinyint
+is_title tinyint,
+is_country tinyint
 );
 
 CREATE INDEX index_belong ON BELONG (id_article, id_word);
