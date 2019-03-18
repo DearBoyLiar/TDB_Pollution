@@ -7,8 +7,10 @@ order by 2 desc
 
 --Récupération du tf de chaque mot dans chaque article
 Select label_word, sum(tf), id_article
-from belong b inner join word w on w.id_word = b.id_word
-where id_article <> 542 and len(word) > 5
+from belong b, word w 
+where w.id_word = b.id_word
+and id_article <> 542
+and tf between 5 and 30
 group by label_word, id_article
 order by 2 desc
 
@@ -29,7 +31,6 @@ and a.id_article = b.id_article
 and b.id_article <> 542
 group by label_word, id_newspaper
 order by 1 desc
-
 
 --par date
 select sum(tf), label_word, publication_date
@@ -68,8 +69,23 @@ and label_word in ('ocean', 'plastiques', 'plastique', 'mer', 'dechets', 'dechet
 order by 3 desc
 
 
-select w.label_word, b.id_article, b.tf
-from belong b, word w
+-- pays par mois
+select distinct label_word, left(publication_date, 7)
+from belong b, word w, article a
 where b.id_word = w.id_word
+and b.id_article = a.id_article
 and b.id_article <> 542
 and is_country = 1
+order by 2 desc
+
+--nb de pays par mois
+select TOP 10 count(distinct label_word), left(publication_date, 7)
+from belong b, word w, article a
+where b.id_word = w.id_word
+and b.id_article = a.id_article
+and b.id_article <> 542
+and is_country = 1
+group by left(publication_date, 7)
+order by 1 desc
+
+
