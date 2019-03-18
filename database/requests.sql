@@ -1,7 +1,8 @@
 --Récupération du tf cumulé de chaque mot en enlevant l'article nul
 Select label_word, sum(tf)
-from belong b inner join word w on w.id_word = b.id_word
-where id_article <> 542
+from belong b, word w 
+where w.id_word = b.id_word
+and id_article <> 542
 group by label_word
 order by 2 desc
 
@@ -88,4 +89,30 @@ and is_country = 1
 group by left(publication_date, 7)
 order by 1 desc
 
+--Mots qui apparaissent le plus dans les descriptions d'article
+Select TOP 8 count(b.id_word), label_word
+from belong b, word w
+where w.id_word = b.id_word
+and label_word not in ('ete', 'ans')
+and b.is_description = 1
+group by label_word
+order by 1 desc
 
+--Mots qui apparaissent le plus dans les titres d'articles
+Select TOP 8 count(b.id_word), label_word
+from belong b, word w
+where w.id_word = b.id_word
+and label_word not in ('ete', 'ans')
+and b.is_title = 1
+group by label_word
+order by 1 desc
+
+--Mots qui apparaissent le plus dans les titres et description d'articles
+Select TOP 8 count(b.id_word), label_word
+from belong b, word w
+where w.id_word = b.id_word
+and label_word not in ('ete', 'ans')
+and b.is_title = 1
+and b.is_description = 1
+group by label_word
+order by 1 desc
