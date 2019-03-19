@@ -1,22 +1,14 @@
 --Récupération du tf cumulé de chaque mot en enlevant l'article nul
-Select label_word, sum(tf)
+Select TOP 30 label_word, sum(tf)
 from belong b, word w 
 where w.id_word = b.id_word
 and id_article <> 542
+and label_word not in ('000')
 group by label_word
 order by 2 desc
 
---Récupération du tf de chaque mot dans chaque article
-Select label_word, sum(tf), id_article
-from belong b, word w 
-where w.id_word = b.id_word
-and id_article <> 542
-and tf between 5 and 30
-group by label_word, id_article
-order by 2 desc
-
 --Avec une liste de pays
-select sum(tf), label_word, id_article
+select TOP 30 sum(tf), label_word, id_article
 from belong b, word w
 where b.id_word = w.id_word 
 and id_article <> 542
@@ -25,53 +17,74 @@ group by label_word, id_article
 order by 1 desc
 
 -- par journaux
-select sum(tf), label_word, id_newspaper
-from belong b, word w, article a
+select TOP 30 sum(tf), label_word, name_newspaper
+from belong b, word w, article a, newspaper n 
 where b.id_word = w.id_word 
 and a.id_article = b.id_article
+and a.id_newspaper = n .id_newspaper
 and b.id_article <> 542
-group by label_word, id_newspaper
-order by 1 desc
-
---par date
-select sum(tf), label_word, publication_date
-from belong b, word w, article a
-where b.id_word = w.id_word 
-and a.id_article = b.id_article
-and b.id_article <> 542
-group by label_word, publication_date
+and label_word not in ('000')
+group by label_word, name_newspaper
 order by 1 desc
 
 --par date / pays
-select sum(tf), label_word, publication_date
+select TOP 30 sum(tf), label_word, left(publication_date,4) 
+from belong b, word w, article a 
+where b.id_word = w.id_word 
+and a.id_article = b.id_article 
+and b.id_article <> 542 
+and b.is_country = 1 
+and left(publication_date,4)  between '1950' and '2019'
+group by label_word, left(publication_date,4) 
+order by 1 desc
+
+--Nombre de mots par date
+select count(label_word), left(publication_date, 4)
 from belong b, word w, article a
 where b.id_word = w.id_word 
 and a.id_article = b.id_article
-and b.id_article <> 542
-and b.is_country = 1
-group by label_word, publication_date
-order by 1 desc
-
---Articles avec le plus de mots 
-select TOP 50 count(label_word), id_article
-from belong b, word w
-where b.id_word = w.id_word 
-and id_article <> 542
-group by id_article
+and a.id_article <> 542
+group by left(publication_date, 4)
 order by 1 desc
 
 --mot pertinent
-select label_word, id_article, tf
-from belong b, word w
+select label_word, a.id_article, tf, publication_date
+from belong b, word w, article a
 where b.id_word = w.id_word 
-and id_article <> 542
+and a.id_article = b.id_article
+and a.id_article <> 542
 and label_word in ('ocean', 'plastiques', 'plastique', 'mer', 'dechets', 'dechet', 'eau', 'pollution',
 'microplastique')
-order by 3 desc
+order by 4 desc
+
+-- pays par mois avec label associé à chaque tranche de date
+select distinct label_word, left(publication_date, 7),
+case when  left(publication_date, 7) between '2010-01' and '2019-03' THEN 1
+when  left(publication_date, 7) between '2000-01' and '2010-01' THEN 2
+when  left(publication_date, 7) between '1990-01' and '2000-01' THEN 3
+when  left(publication_date, 7) between '1980-01' and '1990-01' THEN 4
+when  left(publication_date, 7) between '1970-01' and '1980-01' THEN 5
+when  left(publication_date, 7) between '1960-01' and '1970-01' THEN 6
+when  left(publication_date, 4) between '1950-01' and '1960-01' THEN 7 
+ELSE 8 END
+from belong b, word w, article a
+where b.id_word = w.id_word
+and b.id_article = a.id_article
+and b.id_article <> 542
+and is_country = 1
+order by 2 desc
 
 
--- pays par mois
-select distinct label_word, left(publication_date, 7)
+-- pays par année avec label associé à chaque tranche de date
+select distinct label_word, left(publication_date, 4),
+case when  left(publication_date, 4) between '2010' and '2019' THEN 1
+when  left(publication_date, 4) between '2000' and '2010' THEN 2
+when  left(publication_date, 4) between '1990' and '2000' THEN 3
+when  left(publication_date, 4) between '1980' and '1990' THEN 4
+when  left(publication_date, 4) between '1970' and '1980' THEN 5
+when  left(publication_date, 4) between '1960' and '1970' THEN 6 
+when  left(publication_date, 4) between '1950' and '1960' THEN 7 
+ELSE 8 END
 from belong b, word w, article a
 where b.id_word = w.id_word
 and b.id_article = a.id_article
@@ -80,14 +93,49 @@ and is_country = 1
 order by 2 desc
 
 --nb de pays par mois
-select TOP 10 count(distinct label_word), left(publication_date, 7)
+select a.word, a.date_pub,
+case when  left(a.date_pub, 7) between '2010-01' and '2019-01' THEN 1
+when  left(a.date_pub, 7) between '2000-01' and '2010-01' THEN 2
+when  left(a.date_pub, 7) between '1990-01' and '2000-01' THEN 3
+when  left(a.date_pub, 7) between '1980-01' and '1990-01' THEN 4
+when  left(a.date_pub, 7) between '1970-01' and '1980-01' THEN 5
+when  left(a.date_pub, 7) between '1960-01' and '1970-01' THEN 6 
+when  left(a.date_pub, 7) between '1950-01' and '1960-01' THEN 7 
+ELSE 8 END
+from
+(
+select TOP 30 count(distinct label_word) as word, left(publication_date, 7) as date_pub
 from belong b, word w, article a
 where b.id_word = w.id_word
 and b.id_article = a.id_article
 and b.id_article <> 542
 and is_country = 1
 group by left(publication_date, 7)
-order by 1 desc
+order by 2 desc
+) a
+
+-- nb de pays par année
+select a.word, a.date_pub,
+case when  left(a.date_pub, 4) between '2010' and '2019' THEN 1
+when  left(a.date_pub, 4) between '2000' and '2010' THEN 2
+when  left(a.date_pub, 4) between '1990' and '2000' THEN 3
+when  left(a.date_pub, 4) between '1980' and '1990' THEN 4
+when  left(a.date_pub, 4) between '1970' and '1980' THEN 5
+when  left(a.date_pub, 4) between '1960' and '1970' THEN 6 
+when  left(a.date_pub, 4) between '1950' and '1960' THEN 7 
+ELSE 8 END
+from
+(
+select TOP 30 count(distinct label_word) as word, left(publication_date, 4) as date_pub
+from belong b, word w, article a
+where b.id_word = w.id_word
+and b.id_article = a.id_article
+and b.id_article <> 542
+and is_country = 1
+group by left(publication_date, 4)
+order by 2 desc
+) a
+
 
 --Mots qui apparaissent le plus dans les descriptions d'article
 Select TOP 8 count(b.id_word), label_word
