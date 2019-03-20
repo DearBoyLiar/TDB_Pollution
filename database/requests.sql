@@ -126,16 +126,15 @@ when  left(a.date_pub, 4) between '1950' and '1960' THEN 7
 ELSE 8 END
 from
 (
-select TOP 30 count(distinct label_word) as word, left(publication_date, 4) as date_pub
+select count(distinct label_word) as word, left(publication_date, 4) as date_pub
 from belong b, word w, article a
 where b.id_word = w.id_word
 and b.id_article = a.id_article
 and b.id_article <> 542
 and is_country = 1
 group by left(publication_date, 4)
-order by 2 desc
 ) a
-
+order by 2 desc
 
 --Mots qui apparaissent le plus dans les descriptions d'article
 Select TOP 8 count(b.id_word), label_word
