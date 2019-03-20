@@ -1,4 +1,4 @@
---Récupération du tf cumulé de chaque mot en enlevant l'article nul
+--Récupération du tf cumulé de chaque mot
 Select TOP 30 label_word, sum(tf)
 from belong b, word w 
 where w.id_word = b.id_word
@@ -45,16 +45,16 @@ where b.id_word = w.id_word
 and a.id_article = b.id_article
 and a.id_article <> 542
 group by left(publication_date, 4)
-order by 1 desc
+order by 2 desc
 
 --mot pertinent
-select label_word, a.id_article, tf, publication_date
+select label_word, a.id_article, tf, left(publication_date, 4)
 from belong b, word w, article a
 where b.id_word = w.id_word 
 and a.id_article = b.id_article
 and a.id_article <> 542
 and label_word in ('ocean', 'plastiques', 'plastique', 'mer', 'dechets', 'dechet', 'eau', 'pollution',
-'microplastique')
+'microplastiques', 'microplastiques')
 order by 4 desc
 
 -- pays par mois avec label associé à chaque tranche de date
@@ -65,7 +65,7 @@ when  left(publication_date, 7) between '1990-01' and '2000-01' THEN 3
 when  left(publication_date, 7) between '1980-01' and '1990-01' THEN 4
 when  left(publication_date, 7) between '1970-01' and '1980-01' THEN 5
 when  left(publication_date, 7) between '1960-01' and '1970-01' THEN 6
-when  left(publication_date, 4) between '1950-01' and '1960-01' THEN 7 
+when  left(publication_date, 7) between '1950-01' and '1960-01' THEN 7 
 ELSE 8 END
 from belong b, word w, article a
 where b.id_word = w.id_word
